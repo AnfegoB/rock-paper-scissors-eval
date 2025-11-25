@@ -1,0 +1,13 @@
+train: ../data/train/images
+val: ../data/valid/images
+test: ../data/test/images
+
+nc: 3
+names: ['Paper', 'Rock', 'Scissors']
+
+roboflow:
+  workspace: test-fbwco
+  project: rock-paper-scissors-presentation-gefeo
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/test-fbwco/rock-paper-scissors-presentation-gefeo/dataset/1
