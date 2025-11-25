@@ -4,7 +4,8 @@ from fastapi.responses import JSONResponse
 from ultralytics import YOLO
 from PIL import Image
 from model import model #Cargamos el modelo
-
+import numpy as np
+import io
 
 app = FastAPI()
 
@@ -15,13 +16,20 @@ umbral = 0.4
 def predecir_gesto(imagen):
     """Esta funcion predice el gesto a partir de una imagen"""
 
-    resultado = model(imagen)
+    img =  Image.open(io.BytesIO(imagen)).convert("RGB")
+    img_np = np.array(img)
+    imp_pil = Image.fromarray(img_np) #https://github.com/ultralytics/ultralytics/issues/8172 un poco enredado al momento de transformar el input
+    #Sin embargo, el modelo funciona mejor cuando el tipo de input es PIL y no un array
+    resultado = model(imp_pil)
+    print(resultado)
+   
     #Si ningun cuadro es encontrado:
     if len(resultado) == 0 or len(resultado[0].boxes) == 0:
         return None, 0.0
     
     #Extrayendo los resultados de las cajas generadas ouput: resultado[0].boxes
     boxes = resultado[0].boxes
+    
     mejor_crit = 0
     prediction = None
     for box in boxes:
@@ -49,7 +57,7 @@ def vs_hands(player_A, player_B):
 
 
 @app.post("/play")
-async def play(player_a : UploadFile = File(...), player_b : UploadFile = File(...) ):
+async def play(player_a : UploadFile =  File(...), player_b : UploadFile =  File(...) ):
     im_a = await player_a.read()
     im_b = await player_b.read()
 
@@ -68,15 +76,3 @@ async def play(player_a : UploadFile = File(...), player_b : UploadFile = File(.
            "reason": reason
            }
 
-
-
-#Rough testing
-# imag = Image.open("test_im.jpg")
-# imag2 = Image.open("test2_im.jpg")
-
-
-# res1 = predecir_gesto(imag)[0]
-# res2 = predecir_gesto(imag2)[0]
-
-
-# print(vs_hands(res1,res2))
