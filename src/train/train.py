@@ -1,4 +1,4 @@
-from ultralytics import YOLO
+from ultralytics import YOLO #Importando YOLO
 
 #Empezando con un modelo de cero (no pre-entrenado)
 model = YOLO("yolov8n.yaml")
