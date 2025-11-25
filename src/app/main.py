@@ -38,24 +38,45 @@ def predecir_gesto(imagen):
     return opciones[indice], mejor_crit
 
 def vs_hands(player_A, player_B):
-    if player_A[0] == player_B[0]:
-        return "Empate", "Ambos jugadores escogieron la misma opcion"
+    if player_A == player_B:
+        return "Tie", "Both players picked the same option"
     reglas = {'Tijera':'Papel', 'Piedra':'Tijera', 'Papel':'Piedra'} #Reglas como pares en diccionario
 
-    if reglas[player_A[0]] == player_B[0]:
-        return "Jugador A", f"{player_A[0]} vence a {player_B[0]}" #Ex: Si A es Tijera, llama a Papel, si este coincide con el que pierde con papel, gana
+    if reglas[player_A] == player_B:
+        return "Player A", f"{player_A} beats a {player_B}" #Ex: Si A es Tijera, llama a Papel, si este coincide con el que pierde con papel, gana
     else:
-        return "Jugador B", f"{player_B[0]} vence a {player_A[0]}" #Ex: Caso contrario, si jugador escoge la opcion restante pierde A
+        return "Player B", f"{player_B} beats a {player_A}" #Ex: Caso contrario, si jugador escoge la opcion restante pierde A
+
+
+@app.post("/play")
+async def play(player_a : UploadFile = File(...), player_b : UploadFile = File(...) ):
+    im_a = await player_a.read()
+    im_b = await player_b.read()
+
+    result_a, crit_a = predecir_gesto(im_a)
+    result_b, crit_b = predecir_gesto(im_b)
+
+    if result_a is None or result_b is None:
+        return JSONResponse(status_code=400, content={"undecided": "No se encontró un gesto válido en alguna de las dos imagenes"})
+    
+    winner, reason = vs_hands(result_a,result_b)
+
+    return{
+           "player_a": {"prediction":result_a, "confidence":crit_a },
+           "player_b": {"prediction":result_b, "confidence":crit_b },    
+           "ganador": winner,
+           "reason": reason
+           }
 
 
 
 #Rough testing
-imag = Image.open("test_im.jpg")
-imag2 = Image.open("test2_im.jpg")
+# imag = Image.open("test_im.jpg")
+# imag2 = Image.open("test2_im.jpg")
 
 
-res1 = predecir_gesto(imag)
-res2 = predecir_gesto(imag2)
+# res1 = predecir_gesto(imag)[0]
+# res2 = predecir_gesto(imag2)[0]
 
 
-print(vs_hands(res1,res2))
+# print(vs_hands(res1,res2))
