@@ -17,7 +17,7 @@ def predecir_gesto(imagen):
 
     resultado = model(imagen)
     #Si ningun cuadro es encontrado:
-    if len(resultado) == 0 or len(results[0].boxes) == 0:
+    if len(resultado) == 0 or len(resultado[0].boxes) == 0:
         return None, 0.0
     
     #Extrayendo los resultados de las cajas generadas ouput: resultado[0].boxes
@@ -38,15 +38,24 @@ def predecir_gesto(imagen):
     return opciones[indice], mejor_crit
 
 def vs_hands(player_A, player_B):
-    if player_A == player_B:
+    if player_A[0] == player_B[0]:
         return "Empate", "Ambos jugadores escogieron la misma opcion"
     reglas = {'Tijera':'Papel', 'Piedra':'Tijera', 'Papel':'Piedra'} #Reglas como pares en diccionario
 
-    if reglas[player_A] == player_B:
-        return "Jugador A", f"{player_A} vence a {player_B}" #Ex: Si A es Tijera, llama a Papel, si este coincide con el que pierde con papel, gana
+    if reglas[player_A[0]] == player_B[0]:
+        return "Jugador A", f"{player_A[0]} vence a {player_B[0]}" #Ex: Si A es Tijera, llama a Papel, si este coincide con el que pierde con papel, gana
     else:
-        return "Jugador B", f"{player_B} vence a {player_A}" #Ex: Caso contrario, si jugador escoge la opcion restante pierde A
+        return "Jugador B", f"{player_B[0]} vence a {player_A[0]}" #Ex: Caso contrario, si jugador escoge la opcion restante pierde A
 
+
+
+#Rough testing
 imag = Image.open("test_im.jpg")
-predecir_gesto(imag)
+imag2 = Image.open("test2_im.jpg")
 
+
+res1 = predecir_gesto(imag)
+res2 = predecir_gesto(imag2)
+
+
+print(vs_hands(res1,res2))
